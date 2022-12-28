@@ -5,8 +5,7 @@ import { sample } from 'lodash';
 const PRODUCT_COLOR = ['#00AB55', '#000000', '#FFFFFF', '#FFC0CB', '#FF4842', '#1890FF', '#94D82D', '#FFC107'];
 
 // ----------------------------------------------------------------------
-
-const products = [...Array(24)].map((_, index) => {
+const products = [...Array(25)].map((_, index) => {
   const setIndex = index + 1;
 
   return {
@@ -24,7 +23,7 @@ const products = [...Array(24)].map((_, index) => {
       (setIndex === 23 && PRODUCT_COLOR.slice(4, 6)) ||
       (setIndex === 24 && PRODUCT_COLOR.slice(5, 6)) ||
       PRODUCT_COLOR,
-    status: sample(['sale', 'new', '', '']),
+    status: sample(['done','pending','error']),
   };
 });
 

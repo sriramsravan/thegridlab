@@ -1,9 +1,8 @@
 import PropTypes from 'prop-types';
-import { useEffect } from 'react';
 // @mui
 import { styled, alpha } from '@mui/material/styles';
 import { Link as RouterLink } from 'react-router-dom';
-import { Box, ListItemText, List, Drawer, IconButton, Toolbar, Divider } from '@mui/material';
+import { Box, ListItemText, List, Drawer, IconButton, Toolbar, Divider, Typography } from '@mui/material';
 // mock
 import sessions from '../../../_mock/sessions';
 // components
@@ -26,7 +25,7 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   },
 }));
 
-export default function SessionNav({ onOpenNav , ...other}) {
+export default function SessionNav({ onOpenNav, ...other }) {
   const renderContent = (
     <>
       <StyledToolbar>
@@ -84,6 +83,14 @@ export default function SessionNav({ onOpenNav , ...other}) {
   );
 }
 
+function renderIconStatus(status) {
+  const set = {
+    done: { icon: 'pajamas:status-closed', color: 'green' },
+    error: { icon: 'charm:circle-cross', color: 'red' },
+    pending: { icon: 'pajamas:status-alert', color: 'yellow' },
+  };
+  return set[status] || {};
+}
 // ----------------------------------------------------------------------
 
 SessionNavItem.propTypes = {
@@ -91,25 +98,50 @@ SessionNavItem.propTypes = {
 };
 
 function SessionNavItem({ item }) {
-  const { name, project, id } = item;
-
+  const { name, project, id, status } = item;
+  const { color, icon } = renderIconStatus(status);
   return (
     <StyledNavItem
       component={RouterLink}
       to={`/dashboard/app/${id}`}
       sx={{
         '&.active': {
-          color: 'text.primary !important',
+          color: 'text.primary',
           bgcolor: 'action.selected',
           fontWeight: 'fontWeightBold',
         },
       }}
     >
-      <StyledNavItemIcon><Iconify icon={'eva:edit-fill'} sx={{ mr: 2 }} /></StyledNavItemIcon>
-      <ListItemText disableTypography primary={name} secondary={project} />
-      <p>OS</p>
-      <p>Browser/App</p>
-      <p>Status</p>
+      <StyledNavItemIcon>
+        <Iconify icon={icon} sx={{ mr: 2, color }} />
+      </StyledNavItemIcon>
+      <Box>
+        <Box>
+          <Typography gutterBottom variant="span" align="left">
+            {name}{' '}
+          </Typography>
+          <Typography gutterBottom variant="span" align="right">
+            {project}{' '}
+          </Typography>
+        </Box>
+
+        <Box>
+          <Typography gutterBottom variant="span" align="right">
+            Date
+          </Typography>
+        </Box>
+        <Box>
+          <Typography gutterBottom variant="span">
+            OS{' '}
+          </Typography>
+          <Typography gutterBottom variant="span" align={'left'}>
+            Browser / App{' '}
+          </Typography>
+          <Typography gutterBottom variant="span">
+            {status}
+          </Typography>
+        </Box>
+      </Box>
       {/* <ListSubheader disableTypography primary={name}>{project} </ListSubheader> */}
     </StyledNavItem>
   );
