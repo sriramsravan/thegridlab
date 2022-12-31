@@ -3,14 +3,15 @@ import PropTypes from 'prop-types';
 import { styled, alpha } from '@mui/material/styles';
 import { Link as RouterLink } from 'react-router-dom';
 import { Box, ListItemText, List, Drawer, IconButton, Toolbar, Divider, Typography } from '@mui/material';
-// mock
-import sessions from '../../../_mock/sessions';
+import { useEffect, useState } from 'react';
+
 // components
 import Iconify from '../../../components/iconify';
 import Scrollbar from '../../../components/scrollbar';
 //
 import { StyledNavItem, StyledNavItemIcon } from '../../../components/nav-section/styles';
-
+// service
+import sessionService from '../../../services/session.service';
 import { NAV_WIDTH } from '../nav';
 
 const HEADER_MOBILE = 64;
@@ -26,6 +27,12 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
 }));
 
 export default function SessionNav({ onOpenNav, ...other }) {
+  const [sessions, setSessions] = useState([]);
+  useEffect(() => {
+    sessionService.getSessions().then((body) => {
+      setSessions(body || []);
+    });
+  }, []);
   const renderContent = (
     <>
       <StyledToolbar>
@@ -85,7 +92,7 @@ export default function SessionNav({ onOpenNav, ...other }) {
 
 function renderIconStatus(status) {
   const set = {
-    done: { icon: 'pajamas:status-closed', color: 'green' },
+    completed: { icon: 'pajamas:status-closed', color: 'green' },
     error: { icon: 'charm:circle-cross', color: 'red' },
     pending: { icon: 'pajamas:status-alert', color: 'yellow' },
   };
@@ -98,12 +105,12 @@ SessionNavItem.propTypes = {
 };
 
 function SessionNavItem({ item }) {
-  const { name, project, id, status } = item;
+  const { sessionName: name, project, id, status } = item;
   const { color, icon } = renderIconStatus(status);
   return (
     <StyledNavItem
       component={RouterLink}
-      to={`/dashboard/app/${id}`}
+      to={`/sessions/${id}`}
       sx={{
         '&.active': {
           color: 'text.primary',
@@ -117,7 +124,7 @@ function SessionNavItem({ item }) {
       </StyledNavItemIcon>
       <Box>
         <Box>
-          <Typography gutterBottom variant="span" align="left">
+          <Typography gutterBottom noWrap variant="span" align="left">
             {name}{' '}
           </Typography>
           <Typography gutterBottom variant="span" align="right">

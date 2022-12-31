@@ -21,7 +21,15 @@ export default function Router() {
       children: [
         { element: <MainPage />, index: true },
         { path: 'app', element: <DashboardAppPage /> },
-        { path: 'app/:id', element: <DashboardAppPage /> }
+        { path: 'app/:id', element: <DashboardAppPage /> },
+      ],
+    },
+    {
+      path: '/sessions',
+      element: <DashboardLayout />,
+      children: [
+        { element: <MainPage />, index: true },
+        { path: ':id', element: <MainPage />, index: true },
       ],
     },
     {
