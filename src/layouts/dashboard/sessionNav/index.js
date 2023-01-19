@@ -13,6 +13,8 @@ import { StyledNavItem, StyledNavItemIcon } from '../../../components/nav-sectio
 // service
 import sessionService from '../../../services/session.service';
 import { NAV_WIDTH } from '../nav';
+import useServerSentEvents from '../../../services/ServerSideEvents';
+import { backendUrl } from '../../../config';
 
 const HEADER_MOBILE = 64;
 
@@ -28,6 +30,25 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
 
 export default function SessionNav({ onOpenNav, ...other }) {
   const [sessions, setSessions] = useState([]);
+  const eventListeners = {
+    created: (e) => {
+      const session = JSON.parse(e.data);
+      setSessions((data) => [session, ...data]);
+    },
+    updated: (e) => {
+      const session = JSON.parse(e.data);
+      console.log(session);
+      setSessions((data) => {
+        const index = data.findIndex(({ id }) => id === session.id);
+        data[index] = session;
+        return [...data];
+      });
+    },
+  };
+  const { error, eventSource } = useServerSentEvents(`${backendUrl}/api/sessions/sse`, eventListeners);
+  // eventSource.addEventListener('message', (e) => {
+  //   console.log(e.data);
+  // });
   useEffect(() => {
     sessionService.getSessions().then((body) => {
       setSessions(body || []);
@@ -93,6 +114,7 @@ export default function SessionNav({ onOpenNav, ...other }) {
 function renderIconStatus(status) {
   const set = {
     completed: { icon: 'pajamas:status-closed', color: 'green' },
+    running: { icon: 'pajamas:status-closed', color: 'blue' },
     error: { icon: 'charm:circle-cross', color: 'red' },
     pending: { icon: 'pajamas:status-alert', color: 'yellow' },
   };
@@ -105,7 +127,17 @@ SessionNavItem.propTypes = {
 };
 
 function SessionNavItem({ item }) {
-  const { sessionName: name, project, id, status } = item;
+  const {
+    session_name: name,
+    project,
+    uuid: id,
+    os,
+    type,
+    browser_name: browserName,
+    browser_version: browserVersion,
+    status,
+    created_at: createdAt,
+  } = item;
   const { color, icon } = renderIconStatus(status);
   return (
     <StyledNavItem
@@ -134,18 +166,12 @@ function SessionNavItem({ item }) {
 
         <Box>
           <Typography gutterBottom variant="span" align="right">
-            Date
+            {createdAt}
           </Typography>
         </Box>
         <Box>
           <Typography gutterBottom variant="span">
-            OS{' '}
-          </Typography>
-          <Typography gutterBottom variant="span" align={'left'}>
-            Browser / App{' '}
-          </Typography>
-          <Typography gutterBottom variant="span">
-            {status}
+            {os} {browserName}-{browserVersion}
           </Typography>
         </Box>
       </Box>

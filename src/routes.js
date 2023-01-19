@@ -15,15 +15,15 @@ import DashboardAppPage from './pages/DashboardAppPage';
 
 export default function Router() {
   const routes = useRoutes([
-    {
-      path: '/dashboard',
-      element: <DashboardLayout />,
-      children: [
-        { element: <MainPage />, index: true },
-        { path: 'app', element: <DashboardAppPage /> },
-        { path: 'app/:id', element: <DashboardAppPage /> },
-      ],
-    },
+    // {
+    //   path: '/dashboard',
+    //   element: <DashboardLayout />,
+    //   children: [
+    //     { element: <MainPage />, index: true },
+    //     { path: 'app', element: <DashboardAppPage /> },
+    //     { path: 'app/:id', element: <DashboardAppPage /> },
+    //   ],
+    // },
     {
       path: '/sessions',
       element: <DashboardLayout />,
@@ -42,7 +42,7 @@ export default function Router() {
         { path: 'user', element: <UserPage /> },
         { path: 'products', element: <ProductsPage /> },
         { path: 'blog', element: <BlogPage /> },
-        { element: <Navigate to="/dashboard/app" />, index: true },
+        { element: <Navigate to="/sessions" />, index: true },
         { path: '404', element: <Page404 /> },
         { path: '*', element: <Navigate to="/404" /> },
       ],

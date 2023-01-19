@@ -5,6 +5,10 @@ import PropTypes from 'prop-types';
 
 import sessionService from '../services/session.service';
 import Scrollbar from '../components/scrollbar';
+import JsonViewer from '../components/json-viewer';
+import Duration from '../components/Duration';
+import useServerSentEvents from '../services/ServerSideEvents';
+import { backendUrl } from '../config';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -50,7 +54,7 @@ export default function MainPage() {
         <Logs id={id} />
       </TabPanel>
       <TabPanel value={tabState} index="video">
-        <Video />
+        <Video id={id} />
       </TabPanel>
     </Container>
   );
@@ -58,7 +62,22 @@ export default function MainPage() {
 
 function Logs(props) {
   const [logs, setLogs] = useState([]);
-
+  const eventListeners = {
+    created: (e) => {
+      const log = JSON.parse(e.data);
+      setLogs((data) => [...data, log]);
+    },
+    updated: (e) => {
+      const log = JSON.parse(e.data);
+      setLogs((data) => {
+        // eslint-disable-next-line
+        const index = data.findIndex(({ request_id }) => request_id === log.request_id);
+        data[index] = log;
+        return [...data];
+      });
+    },
+  };
+  const { errors } = useServerSentEvents(`${backendUrl}/api/sessions/${props.id}/logs/sse`, eventListeners);
   useEffect(() => {
     if (props.id)
       sessionService.getLogsBySessionId(props.id).then((body) => {
@@ -74,35 +93,57 @@ function Logs(props) {
         '& .simplebar-content': { height: 1, display: 'flex', flexDirection: 'column' },
       }}
     >
-      <Box>
-        <Grid container direction="column" justifyContent="center" spacing={1}>
-          {logs.map((log) => (
-            <LogItem key={log.request_id} {...log} />
-          ))}
-        </Grid>
-      </Box>
+      {/* <Box> */}
+      <Grid container direction="column" justifyContent="center" spacing={1}>
+        {logs.map((log) => (
+          <LogItem key={log.request_id} {...log} />
+        ))}
+      </Grid>
+      {/* </Box> */}
     </Scrollbar>
   );
 }
 function LogItem(props) {
   return (
-    <Grid container  direction={'row'}>
-      <Grid justifyContent="center" item  alignItems="center" padding={1} xs={1}>
-        {props.elapsed_time}
-      </Grid>
-      <Grid justifyContent="center"  item  alignItems="center" padding={1} xs={3}>
-        {props.url}
-      </Grid>
-      <Grid justifyContent="center"  item  alignItems="center" padding={1} xs={12}>
-        {JSON.stringify(props.payload,null,2)}
-      </Grid>
-      <Grid justifyContent="center"  item  alignItems="center" padding={1} xs={12}>
-        {JSON.stringify(props.response,null,2)}
+    <>
+      <Grid container direction={'row'}>
+        <Grid justifyContent="center" item alignItems="center" padding={1} xs={2}>
+          <Duration seconds={props.elapsed_time} />
+        </Grid>
+        <Grid justifyContent="center" item alignItems="center" padding={1} xs={8}>
+          {props.message ?? props.url}
+        </Grid>
+        <Grid justifyContent="center" item alignItems="center" padding={1} xs={2}>
+          {props.status}
+        </Grid>
+        {props.response?.screenshot && (
+          <Grid container justifyContent="center" item alignItems="center" padding={1} xs={12}>
+            {' '}
+            <Box
+              component="img"
+              sx={{
+                height: 233,
+                width: 350,
+                maxHeight: { xs: 233, md: 167 },
+                maxWidth: { xs: 350, md: 250 },
+              }}
+              alt="The house from the offer."
+              src={`${backendUrl}/${props.response.screenshot}`}
+            />
+          </Grid>
+        )}
+        <Grid justifyContent="center" item alignItems="center" padding={1} xs={6}>
+          {/* {JSON.stringify(props.payload, null, 2)} */}
+          <JsonViewer data={props.payload} title={'Payload'} />
+        </Grid>
+        <Grid justifyContent="center" item alignItems="center" padding={1} xs={6}>
+          <JsonViewer data={props.response} title={'Response'} />
+        </Grid>
       </Grid>
       <Divider />
-    </Grid>
+    </>
   );
 }
 function Video(props) {
-  return <>{props.id}</>;
+  return <Grid>{props.id}</Grid>;
 }

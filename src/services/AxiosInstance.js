@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { backendUrl } from '../config';
 
-const BASE_URL = 'http://localhost:3000/api';
+const BASE_URL =`${backendUrl}/api`;
 const axiosAuth = axios.create({
   baseURL: BASE_URL,
 });
