@@ -37,7 +37,6 @@ export default function SessionNav({ onOpenNav, ...other }) {
     },
     updated: (e) => {
       const session = JSON.parse(e.data);
-      console.log(session);
       setSessions((data) => {
         const index = data.findIndex(({ id }) => id === session.id);
         data[index] = session;
@@ -142,7 +141,7 @@ function SessionNavItem({ item }) {
   return (
     <StyledNavItem
       component={RouterLink}
-      to={`/sessions/${id}`}
+      to={`/builds/${id}/sessions`}
       sx={{
         '&.active': {
           color: 'text.primary',

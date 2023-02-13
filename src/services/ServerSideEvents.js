@@ -7,7 +7,13 @@ function useServerSentEvents(url, events) {
 
   useEffect(() => {
     if (!eventSource) {
-      const eventSource = new EventSource(url);
+      const token = localStorage.getItem('token');
+      const eventSource = new EventSource(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials:true
+      });
       setEventSource(eventSource);
       Object.keys(events).forEach((event) => {
         eventSource.addEventListener(event, events[event]);
@@ -20,7 +26,10 @@ function useServerSentEvents(url, events) {
         console.error(error);
         setError(error);
       });
-
+      eventSource.addEventListener('close', (error) => {
+        eventSource.close();
+        setError(null);
+      });
     }
 
     return () => {
